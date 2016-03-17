@@ -1,0 +1,226 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task-4.0.xsd
+      ">
+    <!-- Spring MVC配置 -->
+    <context:annotation-config/>
+    <!-- 启动注解驱动的Spring MVC功能，注册请求url和注解POJO类方法的映射-->
+    <mvc:annotation-driven/>
+    <!-- 支持异步方法执行 -->
+    <task:annotation-driven/>
+    <!--AOP自动支持-->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+    <!-- 启动包扫描功能 -->
+    <context:component-scan base-package="com.goodrain.lucien"/>
+
+
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <!-- 核心线程数 -->
+        <property name="corePoolSize" value="5"/>
+        <!-- 最大线程数 -->
+        <property name="maxPoolSize" value="50"/>
+        <!-- 队列最大长度 -->
+        <property name="queueCapacity" value="100"/>
+        <!-- 线程池维护线程所允许的空闲时间，默认为60s -->
+        <property name="keepAliveSeconds" value="60"/>
+    </bean>
+    <!-- 注解式 -->
+    <!-- 对静态资源文件的访问 -->
+    <!--<mvc:resources mapping="/assets/**" location="/assets/" cache-period="31556926"/>-->
+    <!--<mvc:resources mapping="/html/**" location="/html/" cache-period="31556926"/>-->
+    <!--<mvc:resources mapping="/files/preview/**" location="/files/preview/" cache-period="31556926"/>-->
+
+    <!-- 配置国际化资源文件路径 -->
+    <!--<bean id="tableMessageSource" class="org.springframework.context.support.ResourceBundleMessageSource">-->
+        <!--<property name="basename" value="i18n-table"></property>-->
+        <!--<property name="defaultEncoding" value="utf-8"></property>-->
+    <!--</bean>-->
+    <!-- 视图解析器和json解析器 -->
+    <!-- View Resolver for JSP-->
+    <!--<bean id="viewResolver"-->
+          <!--class="org.springframework.web.servlet.view.InternalResourceViewResolver">-->
+        <!--<property name="viewClass" value="org.springframework.web.servlet.view.InternalResourceView"/>-->
+        <!--<property name="prefix" value="/WEB-INF/jsp/"></property>-->
+        <!--&lt;!&ndash;可为空,方便实现自已的依据扩展名来选择视图解释类的逻辑 &ndash;&gt;-->
+        <!--<property name="suffix" value=".jsp"></property>-->
+        <!--<property name="order" value="0"/>-->
+    <!--</bean>-->
+    <!-- View Resolver for freemarker  start-->
+    <!--<bean id="freemarkerViewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">-->
+    <!--<property name="viewClass" value="org.springframework.web.servlet.view.freemarker.FreeMarkerView"/>-->
+    <!--<property name="cache" value="true"/>-->
+    <!--<property name="prefix" value="/WEB-INF/ftl/"/>-->
+    <!--<property name="suffix" value=".ftl"/>-->
+    <!--<property name="contentType" value="text/html;charset=UTF-8"/>-->
+    <!--<property name="exposeRequestAttributes" value="true"/>-->
+    <!--<property name="exposeSessionAttributes" value="true"/>-->
+    <!--<property name="exposeSpringMacroHelpers" value="true"/>-->
+    <!--<property name="order" value="1"/>-->
+    <!--</bean>-->
+    <!--<bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape"/>-->
+    <!--<bean id="freemarkerConfigurer"-->
+    <!--class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">-->
+    <!--&lt;!&ndash;<property name="templateLoaderPath" value="/WEB-INF/view/" />&ndash;&gt;-->
+    <!--<property name="defaultEncoding" value="utf-8"/>-->
+    <!--<property name="freemarkerSettings">-->
+    <!--<props>-->
+    <!--<prop key="template_update_delay">10</prop>-->
+    <!--<prop key="locale">zhCN</prop>-->
+    <!--<prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>-->
+    <!--<prop key="date_format">yyyy-MM-dd</prop>-->
+    <!--<prop key="number_format">#.##</prop>-->
+    <!--</props>-->
+    <!--</property>-->
+    <!--</bean>-->
+
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager"/>
+    <bean id="contentNegotiationManager"
+          class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <!-- 扩展名至mimeType的映射,即 /user.json => application/json -->
+        <property name="favorPathExtension" value="true"/>
+        <!-- 用于开启 /userinfo/123?format=json 的支持 -->
+        <property name="favorParameter" value="false"/>
+        <property name="parameterName" value="mediaType"/>
+        <!-- 是否忽略Accept Header -->
+        <property name="ignoreAcceptHeader" value="true"/>
+        <property name="useJaf" value="false"/>
+        <!-- 默认的content type -->
+        <property name="defaultContentType" value="text/html"/>
+
+        <property name="mediaTypes">
+            <map>
+                <entry key="json" value="application/json"/>
+                <entry key="xml" value="application/xml"/>
+                <entry key="html" value="text/html"/>
+            </map>
+        </property>
+    </bean>
+
+    <!-- Configure bean to convert JSON to POJO and vice versa -->
+    <bean id="jsonMessageConverter"
+          class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+    </bean>
+    <!-- Configure to plugin JSON as request and response in method handler -->
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <ref bean="jsonMessageConverter"/>
+            </list>
+        </property>
+    </bean>
+
+
+    <!-- 文件上传解析器 -->
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- one of the properties available; the maximum file size in bytes -->
+        <property name="maxUploadSize" value="-1"/>
+    </bean>
+
+    <!-- 加载配置文件 -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:jdbc.properties</value>
+                <value>classpath:config.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 定义数据源 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <!-- 基本属性 url、user、password -->
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="driverClassName" value="${jdbc.driverClass}"/>
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="1"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxActive" value="20"/>
+
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="60000"/>
+
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="20"/>
+
+        <!-- 配置监控统计拦截的filters -->
+        <property name="filters" value="stat"/>
+    </bean>
+
+
+    <!--<bean id="config" class="com.yl.tiger.utils.ConfigureUtil">-->
+        <!--<property name="dev" value="${dev}"/>-->
+        <!--<property name="fileStorePath" value="${fileStorePath}"/>-->
+        <!--<property name="host" value="${host}"/>-->
+    <!--</bean>-->
+
+    <!-- 定义jdbcTemplate -->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+        <constructor-arg>
+            <ref bean="dataSource"/>
+        </constructor-arg>
+    </bean>
+
+    <!-- 定义事务管理器 -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource">
+            <ref bean="dataSource"/>
+        </property>
+    </bean>
+
+    <!-- 配置事务特性 ，配置add、delete和update开始的方法，事务传播特性为required -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="save*" propagation="REQUIRED"/>
+            <tx:method name="insert*" propagation="REQUIRED"/>
+            <tx:method name="delete*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+            <tx:method name="login*" propagation="REQUIRED"/>
+            <tx:method name="regist*" propagation="REQUIRED"/>
+            <!--<tx:method name="*" read-only="true"/>-->
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- 配置那些类的方法进行事务管理 -->
+    <aop:config>
+        <aop:pointcut id="allManagerMethod" expression="execution (* com.goodrain.lucien.dao.*.impl.*Impl.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="allManagerMethod"/>
+    </aop:config>
+
+</beans>
